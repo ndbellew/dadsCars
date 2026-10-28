@@ -1,0 +1,112 @@
+openapi: 3.1.0
+info:
+  title: DadsCars API
+  version: 0.1.0
+  description: Phase 1 vehicle catalog and deterministic search API.
+servers:
+  - url: /api/v1
+paths:
+  /health:
+    get:
+      summary: API health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, const: ok }
+  /vehicles:
+    get:
+      summary: List vehicle model specifications
+      responses:
+        '200':
+          description: Vehicle models
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Vehicle' }
+  /vehicles/{id}:
+    get:
+      summary: Get a vehicle model
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Vehicle model
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Vehicle' }
+        '404': { description: Vehicle not found }
+  /vehicles/search:
+    post:
+      summary: Search vehicle models with exact matches and close alternatives
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Filters' }
+      responses:
+        '200':
+          description: Deterministically ranked results; mismatches explain unmet or unknown criteria
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [exact_matches, alternatives]
+                properties:
+                  exact_matches: { type: array, items: { $ref: '#/components/schemas/Vehicle' } }
+                  alternatives: { type: array, items: { $ref: '#/components/schemas/Vehicle' } }
+        '400': { description: Invalid JSON or unsupported/invalid filter }
+components:
+  schemas:
+    Filters:
+      type: object
+      additionalProperties: false
+      properties:
+        body_style: { type: string }
+        powertrain: { type: string }
+        engine: { type: string }
+        drivetrain: { type: string }
+        transmission: { type: string }
+        seats: { type: integer, minimum: 0, description: Minimum seat count }
+        doors: { type: integer, minimum: 0 }
+        min_mpg: { type: integer, minimum: 0 }
+        max_price: { type: integer, minimum: 0 }
+        min_year: { type: integer, minimum: 0 }
+        max_year: { type: integer, minimum: 0 }
+        max_mileage: { type: integer, minimum: 0 }
+    Vehicle:
+      type: object
+      required: [id, make, model, year]
+      properties:
+        id: { type: integer }
+        make: { type: string }
+        model: { type: string }
+        year: { type: integer }
+        body_style: { type: [string, 'null'] }
+        powertrain: { type: [string, 'null'] }
+        engine: { type: [string, 'null'] }
+        drivetrain: { type: [string, 'null'] }
+        transmission: { type: [string, 'null'] }
+        seats: { type: [integer, 'null'] }
+        doors: { type: [integer, 'null'] }
+        combined_mpg: { type: [number, 'null'] }
+        msrp: { type: [integer, 'null'] }
+        mileage: { type: [integer, 'null'] }
+        matched: { type: boolean }
+        mismatches:
+          type: array
+          items:
+            type: object
+            properties:
+              requirement: { type: string }
+              expected: {}
+              actual: {}
+              reason: { type: string, enum: [mismatch, unknown] }
