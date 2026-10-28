@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "DadsCars",
+    "slug": "dadscars",
+    "version": "0.1.0",
+    "scheme": "dadscars",
+    "plugins": ["expo-router"],
+    "experiments": { "typedRoutes": true }
+  }
+}
