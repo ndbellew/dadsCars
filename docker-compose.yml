@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: dadscars
+      POSTGRES_USER: dadscars
+      POSTGRES_PASSWORD: local-dev-only
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dadscars -d dadscars"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://dadscars:local-dev-only@db:5432/dadscars
+      SECRET_KEY: development-only-change-me
+    ports: ["5000:5000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/v1/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      db: {condition: service_healthy}
+volumes:
+  postgres_data:

@@ -1,9 +1,9 @@
 import os
-import time
 
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or "Dad'sSecretKey"
+    SECRET_KEY = os.environ.get("SECRET_KEY")
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "DATABASE_URL", "sqlite:///dadscars-dev.db"
+    )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    
-    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://username:password@dad-postgres:5432/database_name"

@@ -1,0 +1,27 @@
+name: Backend CI
+on:
+  push: {branches: [development, main]}
+  pull_request: {branches: [development, main]}
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: {POSTGRES_DB: dadscars, POSTGRES_USER: dadscars, POSTGRES_PASSWORD: test}
+        ports: [5432:5432]
+        options: --health-cmd "pg_isready -U dadscars" --health-interval 5s --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip}
+      - run: pip install -r requirements.txt -r backend/requirements-dev.txt
+      - run: ruff check backend app config.py dad.py && ruff format --check backend app config.py dad.py
+      - run: mypy --config-file backend/pyproject.toml backend app config.py dad.py
+      - run: flask --app dad.py db upgrade
+        env:
+          DATABASE_URL: postgresql+psycopg://dadscars:test@localhost:5432/dadscars
+      - run: pytest backend/tests --cov=app.services.matching --cov-report=term-missing --cov-fail-under=80
+      - run: bandit -r app
+      - run: pip-audit -r requirements.txt
+      - run: docker build -f backend/Dockerfile -t dadscars-backend:ci .
