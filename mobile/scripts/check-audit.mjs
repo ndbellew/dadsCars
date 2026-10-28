@@ -1,4 +1,3 @@
-
 import { spawnSync } from 'node:child_process';
 
 const APPROVED_ADVISORY = 'GHSA-mrhx-c7xc-m3w5';
@@ -39,19 +38,24 @@ for (const [name, vulnerability] of Object.entries(report.vulnerabilities)) {
   if (!['high', 'critical'].includes(vulnerability.severity)) continue;
 
   const advisories = vulnerability.via.filter(
-    (item) => typeof item === 'object' && item !== null
+    (item) => typeof item === 'object' && item !== null,
   );
 
   const approved =
     allowedPackages.has(name) &&
     advisories.length > 0 &&
-    advisories.every((item) => item.name === 'zod' &&
-      item.url === `https://github.com/advisories/${APPROVED_ADVISORY}`);
+    advisories.every(
+      (item) =>
+        item.name === 'zod' &&
+        item.url === `https://github.com/advisories/${APPROVED_ADVISORY}`,
+    );
 
   if (approved) {
     console.warn(`Approved temporary exception: ${name}`);
   } else {
-    console.error(`Blocking vulnerability: ${name} (${vulnerability.severity})`);
+    console.error(
+      `Blocking vulnerability: ${name} (${vulnerability.severity})`,
+    );
     blocked = true;
   }
 }
