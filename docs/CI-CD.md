@@ -1,6 +1,6 @@
 # CI/CD and releases
 
-GitHub-hosted workflows are configured for mobile/backend checks plus Gitleaks. CI status has not been observed on GitHub from this environment. Local `npm audit --audit-level=high` currently reports three high-severity issues in the Expo SDK 57 transitive toolchain; safe `npm audit fix` cannot resolve them without a breaking SDK/dependency change, so Mobile CI is expected to fail the audit gate until reviewed upstream fixes land. Python `pip-audit` reports no known vulnerabilities. Pin actions to reviewed immutable SHAs before adopting for production. Dependabot proposes pip/npm/action updates. No deploy or publish job exists.
+GitHub-hosted workflows are configured for mobile/backend checks plus Gitleaks. CI status has not been observed on GitHub from this environment. The mobile high-severity audit gate remains enabled and currently fails on one underlying Zod advisory exposed through three Expo CLI dependency nodes; moderate URL-decoding and low deepmerge advisories also remain. Paths, runtime exposure, and safe remediation options are documented in [DEPENDENCY-AUDIT.md](DEPENDENCY-AUDIT.md). Python `pip-audit` reports no known vulnerabilities. Pin actions to reviewed immutable SHAs before adopting for production. Dependabot proposes pip/npm/action updates. No deploy or publish job exists.
 
 Recommend protecting `main`: require PRs, passing mobile/backend/security checks, up-to-date branch, and disallow direct pushes. Owner must configure repository settings; not enabled here.
 
