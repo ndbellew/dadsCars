@@ -1,14 +1,14 @@
-import requests
 import sqlalchemy as sa
-from flask import render_template
+from flask import Blueprint, render_template
 
-from app import app as api, db
-from app.models import Cars
+from app import db
+from app.models import VehicleModel
+
+legacy = Blueprint("legacy", __name__)
 
 
-
-@api.route('/')
-@api.route('/index')
+@legacy.get("/")
+@legacy.get("/index")
 def index():
-    cars = db.session.execute(sa.select(Cars)).scalars().all()
-    return render_template('index.html', title='Home', cars=cars)
+    cars = db.session.execute(sa.select(VehicleModel)).scalars().all()
+    return render_template("index.html", title="Home", cars=cars)
